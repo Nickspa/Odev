@@ -1,0 +1,181 @@
+using System;
+using System.Collections.Generic;
+
+namespace DepoSistemi
+{
+    public class Urun
+    {
+        public string Adi { get; set; }
+        public double BirimFiyat { get; set; }
+        public int Adet { get; set; }
+
+        public Urun(string adi, double birimFiyat, int adet)
+        {
+            Adi = adi;
+            BirimFiyat = birimFiyat;
+            Adet = adet;
+        }
+
+        public double ToplamTutar()
+        {
+            return BirimFiyat * Adet;
+        }
+    }
+
+    class Program
+    {
+        static List<Urun> depo = new List<Urun>();
+        static double bakiye = 1000; 
+
+        static void Main(string[] args)
+        {
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("Depo Sistemi");
+                Console.WriteLine("1. Ürün Ekle");
+                Console.WriteLine("2. Ürün Sat");
+                Console.WriteLine("3. Depo Durumu");
+                Console.WriteLine("4. Çıkış");
+                Console.Write("Bir seçenek girin: ");
+                string secim = Console.ReadLine();
+
+                if (secim == "1")
+                {
+                    UrunEkle();
+                }
+                else if (secim == "2")
+                {
+                    UrunSatis();
+                }
+                else if (secim == "3")
+                {
+                    DepoDurumu();
+                }
+                else if (secim == "4")
+                {
+                    break;
+                }
+                else
+                {
+                    Console.WriteLine("Geçersiz seçenek! Tekrar deneyin.");
+                    Console.ReadKey();
+                }
+            }
+        }
+
+        static void UrunEkle()
+        {
+            Console.Clear();
+            Console.WriteLine("Ürün Ekleme");
+            Console.Write("Ürün Adı: ");
+            string adi = Console.ReadLine();
+            Console.Write("Birim Fiyatı: ");
+            double birimFiyat = double.Parse(Console.ReadLine());
+            Console.Write("Adet: ");
+            int adet = int.Parse(Console.ReadLine());
+
+            Urun mevcutUrun = depo.Find(u => u.Adi == adi);
+
+            if (mevcutUrun != null)
+            {
+                mevcutUrun.Adet += adet;
+                Console.WriteLine("Ürün mevcut, adet arttırıldı.");
+            }
+            else
+            {
+                depo.Add(new Urun(adi, birimFiyat, adet));
+                Console.WriteLine("Yeni ürün depoya eklendi.");
+            }
+
+            Console.WriteLine("İşlem tamamlandı. Devam etmek için bir tuşa basın...");
+            Console.ReadKey();
+        }
+
+        static void UrunSatis()
+        {
+            Console.Clear();
+            Console.WriteLine("Ürün Satış");
+
+            if (depo.Count == 0)
+            {
+                Console.WriteLine("Depoda satılacak ürün yok.");
+                Console.ReadKey();
+                return;
+            }
+
+            Console.WriteLine("Mevcut Ürünler:");
+            for (int i = 0; i < depo.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {depo[i].Adi} - {depo[i].BirimFiyat} TL - {depo[i].Adet} adet");
+            }
+
+            Console.Write("Satmak istediğiniz ürün numarasını girin: ");
+            int secilenUrunNo = int.Parse(Console.ReadLine()) - 1;
+
+            if (secilenUrunNo < 0 || secilenUrunNo >= depo.Count)
+            {
+                Console.WriteLine("Geçersiz ürün numarası.");
+                Console.ReadKey();
+                return;
+            }
+
+            Urun secilenUrun = depo[secilenUrunNo];
+
+            Console.Write("Satmak istediğiniz adet: ");
+            int satilacakAdet = int.Parse(Console.ReadLine());
+
+            if (satilacakAdet > secilenUrun.Adet)
+            {
+                Console.WriteLine("Depoda yeterli ürün yok.");
+                Console.ReadKey();
+                return;
+            }
+
+            double toplamTutar = secilenUrun.BirimFiyat * satilacakAdet;
+
+            Console.WriteLine($"Toplam tutar: {toplamTutar} TL");
+
+            if (toplamTutar > bakiye)
+            {
+                Console.WriteLine("Bakiye yetersiz. Satın alma işlemi yapılamaz.");
+            }
+            else
+            {
+                bakiye += toplamTutar;
+                secilenUrun.Adet -= satilacakAdet;
+
+                if (secilenUrun.Adet == 0)
+                {
+                    depo.Remove(secilenUrun); 
+                }
+
+                Console.WriteLine($"Satış başarılı! Yeni bakiye: {bakiye} TL");
+            }
+
+            Console.WriteLine("İşlem tamamlandı. Devam etmek için bir tuşa basın...");
+            Console.ReadKey();
+        }
+
+        static void DepoDurumu()
+        {
+            Console.Clear();
+            Console.WriteLine("Depo Durumu");
+
+            if (depo.Count == 0)
+            {
+                Console.WriteLine("Depoda ürün yok.");
+            }
+            else
+            {
+                foreach (var urun in depo)
+                {
+                    Console.WriteLine($"{urun.Adi} - {urun.BirimFiyat} TL - {urun.Adet} adet");
+                }
+            }
+
+            Console.WriteLine("Devam etmek için bir tuşa basın...");
+            Console.ReadKey();
+        }
+    }
+}
